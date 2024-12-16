@@ -1,17 +1,26 @@
 import streamlit as st
-from transformers import pipeline
+from textblob import TextBlob
 import random
 
-# Cargar un modelo más pequeño para análisis de sentimientos (DistilBERT)
-sentiment_analyzer = pipeline('sentiment-analysis', model='distilbert-base-uncased-finetuned-sst-2-english')
-
-# Función para analizar el estado de ánimo del usuario
+# Función para analizar el estado de ánimo del usuario usando TextBlob
 def analizar_estado_de_animo(texto_usuario):
-    # Realiza el análisis de sentimientos
-    resultado = sentiment_analyzer(texto_usuario)[0]
-    etiqueta = resultado['label']
-    puntuacion = resultado['score']
-    return etiqueta, puntuacion
+    # Crear un objeto TextBlob
+    blob = TextBlob(texto_usuario)
+    
+    # Realizar el análisis de sentimientos
+    sentimiento = blob.sentiment.polarity  # Valor entre -1 y 1
+    
+    # Si la polaridad es positiva, lo consideramos como "POSITIVO"
+    if sentimiento > 0:
+        estado = "POSITIVE"
+    elif sentimiento < 0:
+        estado = "NEGATIVE"
+    else:
+        estado = "NEUTRAL"
+    
+    # La puntuación de confianza es simplemente la polaridad en este caso
+    puntuacion = abs(sentimiento)  # La puntuación debe ser un valor entre 0 y 1
+    return estado, puntuacion
 
 # Función para generar recomendaciones sobre cómo hablarle al usuario
 def recomendaciones_para_manejo(estado, puntuacion):
